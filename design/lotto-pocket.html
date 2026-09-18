@@ -1,0 +1,109 @@
+<div id="lotto-pocket" aria-label="로또 포켓 모바일 화면 시안">
+  <style>
+    #lotto-pocket{--lp-bg:light-dark(#f5f7f3,#151c18);--lp-card:light-dark(#ffffff,#202a23);--lp-text:light-dark(#1b3026,#eff5ef);--lp-muted:light-dark(#64736a,#b1beb4);--lp-line:light-dark(#e1e7de,#3d4a40);--lp-accent:light-dark(#246447,#91d4a9);--lp-on:light-dark(#ffffff,#142e1d);--lp-soft:light-dark(#e9f2e9,#2a3c2e);word-break:keep-all;font:16px/1.5 system-ui,'Malgun Gothic',sans-serif;color:var(--lp-text);max-width:420px;margin:auto}
+    #lotto-pocket *{box-sizing:border-box}#lotto-pocket button,#lotto-pocket input,#lotto-pocket select,#lotto-pocket textarea{font:inherit}
+    #lotto-pocket button{color:inherit;background:var(--lp-card);border:1px solid var(--lp-line);border-radius:14px;min-height:48px;padding:10px 14px;font-weight:600;touch-action:manipulation}
+    #lotto-pocket button:focus-visible,#lotto-pocket input:focus-visible,#lotto-pocket select:focus-visible,#lotto-pocket textarea:focus-visible{outline:3px solid var(--lp-accent);outline-offset:3px}
+    #lotto-pocket button:disabled{opacity:.45}#lotto-pocket button.primary{background:var(--lp-accent);color:var(--lp-on);border-color:var(--lp-accent)}
+    #lotto-pocket button[aria-pressed=true]{background:var(--lp-soft);border:2px solid var(--lp-accent);color:var(--lp-accent)}
+    #lotto-pocket .phone{background:var(--lp-bg);border:1px solid var(--lp-line);border-radius:30px;overflow:hidden;box-shadow:0 18px 44px #14271b12}
+    #lotto-pocket .top{padding:22px 22px 0}#lotto-pocket .brand{display:flex;align-items:center;gap:9px;font-weight:750;font-size:17px}#lotto-pocket .brand-mark{background:var(--lp-accent);color:var(--lp-on);width:29px;height:29px;display:grid;place-items:center;border-radius:10px;font-size:15px}
+    #lotto-pocket .eyebrow{font-size:12px;letter-spacing:.08em;color:var(--lp-muted);margin-top:20px}#lotto-pocket h2{font-size:27px;line-height:1.3;letter-spacing:-1px;margin:6px 0 8px}#lotto-pocket h3{font-size:17px;margin:0 0 12px}#lotto-pocket p{margin:5px 0}#lotto-pocket small{font-size:13px;color:var(--lp-muted)}
+    #lotto-pocket .content{padding:20px 18px 10px;min-height:350px}#lotto-pocket .panel{padding:18px;background:var(--lp-card);border:1px solid var(--lp-line);border-radius:20px;margin-bottom:12px}#lotto-pocket .soft{background:var(--lp-soft)}
+    #lotto-pocket .row{display:flex;gap:10px;align-items:center;justify-content:space-between}#lotto-pocket .stack{display:grid;gap:10px}#lotto-pocket .space{margin-top:14px}#lotto-pocket .subtle{color:var(--lp-muted);font-size:14px}#lotto-pocket .tag{display:inline-block;padding:4px 9px;border-radius:8px;background:var(--lp-soft);font-size:12px;color:var(--lp-accent);font-weight:650}
+    #lotto-pocket .balls{display:flex;gap:6px;justify-content:space-between;margin:12px 0 4px}#lotto-pocket .ball{display:inline-grid;place-items:center;flex:0 1 40px;height:40px;min-width:0;border-radius:50%;font-size:15px;font-weight:750;font-variant-numeric:tabular-nums;background:light-dark(#eee3b8,#5a4c21);color:light-dark(#655015,#ffe59b)}
+    #lotto-pocket .ball.b2{background:light-dark(#dceaf5,#233e56);color:light-dark(#24567c,#b9ddfc)}#lotto-pocket .ball.b3{background:light-dark(#f6dfdc,#53332f);color:light-dark(#924138,#ffccc5)}#lotto-pocket .ball.b4{background:light-dark(#e7e7e4,#42443f);color:light-dark(#53564e,#e5e8dc)}#lotto-pocket .ball.b5{background:light-dark(#dfeeda,#2e4929);color:light-dark(#3a6630,#c1e7b3)}#lotto-pocket .ball.locked{outline:2px solid var(--lp-accent);outline-offset:2px}
+    #lotto-pocket .footer{padding:14px 18px 16px;background:var(--lp-card);border-top:1px solid var(--lp-line)}#lotto-pocket .actions{display:grid;grid-template-columns:1fr 1.3fr;gap:8px}#lotto-pocket .full{width:100%}#lotto-pocket .count{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:9px 0 18px}#lotto-pocket .count button{padding:10px 0}
+    #lotto-pocket nav{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:8px 12px 18px;background:var(--lp-card);border-top:1px solid var(--lp-line)}#lotto-pocket nav button{border:0;border-radius:12px;font-size:13px;display:grid;gap:3px;justify-items:center;padding:9px 4px;font-weight:500}#lotto-pocket nav button.active{background:var(--lp-soft);color:var(--lp-accent)}#lotto-pocket nav svg{width:21px;height:21px}
+    #lotto-pocket .toggle{min-height:48px;display:flex;gap:12px;justify-content:space-between;align-items:center;font-size:15px}#lotto-pocket input[type=checkbox]{width:25px;height:25px;accent-color:var(--lp-accent)}#lotto-pocket .game-head{display:flex;justify-content:space-between;align-items:center;font-size:14px}#lotto-pocket .game-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}#lotto-pocket .game-actions button{font-size:13px;padding:8px 12px}
+    #lotto-pocket .edit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}#lotto-pocket .edit-grid button{min-height:72px;font-size:22px;display:grid;padding:8px}#lotto-pocket .edit-grid small{font-size:12px;color:inherit}#lotto-pocket .sheet{border-radius:24px 24px 0 0;padding:22px 18px 18px;background:var(--lp-card);border-top:1px solid var(--lp-line)}#lotto-pocket .handle{width:38px;height:4px;border-radius:4px;background:var(--lp-line);margin:-8px auto 18px}
+    #lotto-pocket textarea,#lotto-pocket select,#lotto-pocket input[type=number]{width:100%;background:var(--lp-bg);color:var(--lp-text);border:1px solid var(--lp-line);border-radius:12px;padding:12px;margin-top:6px}#lotto-pocket textarea{min-height:180px}#lotto-pocket .sample-note{padding:10px 18px;font-size:12px;text-align:center;background:var(--lp-soft);color:var(--lp-muted)}#lotto-pocket #lp-status{padding:0 18px 12px;font-size:13px;color:var(--lp-accent);min-height:24px}#lotto-pocket .empty-art{display:flex;justify-content:center;gap:8px;margin:28px 0}#lotto-pocket .empty-art .ball{flex-basis:46px;height:46px}#lotto-pocket .metric{font-size:30px;font-weight:700;letter-spacing:-1px}#lotto-pocket .statrow{display:grid;grid-template-columns:36px 1fr 58px;align-items:center;gap:10px;margin:14px 0;font-size:14px}#lotto-pocket .track{height:8px;background:var(--lp-soft);border-radius:5px}#lotto-pocket .track span{display:block;height:100%;background:var(--lp-accent);border-radius:5px}
+    #lotto-pocket[data-page=edit] .content{min-height:190px}#lotto-pocket[data-page=methods] .content{min-height:160px}#lotto-pocket[data-page=input] .content{min-height:220px} @media(max-width:360px){#lotto-pocket .content{padding:16px 12px 8px}#lotto-pocket .panel{padding:14px}#lotto-pocket .top{padding:20px 16px 0}#lotto-pocket h2{font-size:25px}#lotto-pocket .balls{gap:5px}#lotto-pocket .ball{height:35px}#lotto-pocket .footer{padding:14px 12px}}
+  </style>
+  <div class="phone">
+    <div class="top"><div class="brand"><span class="brand-mark">6</span>로또 포켓 <span class="tag">화면 시안</span></div><div id="lp-heading"></div></div>
+    <div id="lp-body"></div><div id="lp-status" role="status" aria-live="polite"></div><div id="lp-controls"></div>
+    <nav aria-label="하단 메뉴"><button data-nav="recommend" class="active"><i data-lucide="sparkles" aria-hidden="true"></i>번호 추천</button><button data-nav="history"><i data-lucide="tickets" aria-hidden="true"></i>내 로또</button><button data-nav="stats"><i data-lucide="chart-no-axes-column" aria-hidden="true"></i>번호 통계</button></nav>
+    <div class="sample-note">UX 체험용 · 예시 데이터 · 기록은 미리보기 동안만 유지</div>
+  </div>
+  <script>
+  (()=>{
+    const root=document.getElementById('lotto-pocket');
+    const sample=[[3,11,18,24,32,41],[7,14,22,28,33,45],[3,9,18,27,35,42],[5,11,19,24,38,44],[7,14,21,28,32,41]];
+    const rank=[7,24,11,33,41,3,18,28,14,32]; // UX example only; not historical results.
+    let state={tab:'recommend',page:'home',count:5,hot:false,tickets:[],games:[],locks:[],records:[],editing:0,source:'qr',mode:'global',period:'all',draft:'',message:''};
+    const q=s=>root.querySelector(s), key=a=>[...a].sort((a,b)=>a-b).join(','), clone=x=>JSON.parse(JSON.stringify(x));
+    function pool(){const excluded=new Set(state.tickets.flat());const ranking=state.mode==='registered'?rank.filter(n=>excluded.has(n)).slice(0,3):rank;const restored=state.hot?ranking.filter(n=>excluded.has(n)):[];return {excluded,restored,values:Array.from({length:45},(_,i)=>i+1).filter(n=>!excluded.has(n)||restored.includes(n))};}
+    function makeGame(index,others,previous){const locked=state.locks[index]||[];if(locked.length===6)return [...locked].sort((a,b)=>a-b);const choices=pool().values.filter(n=>!locked.includes(n));if(choices.length+locked.length<6)throw Error('후보가 부족해요. 제외번호나 잠금을 줄여 주세요.');const forbidden=new Set([...state.tickets,...others,...(previous?[previous]:[])].map(key));for(let tries=0;tries<3000;tries++){const deck=[...choices];for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}const game=[...locked,...deck.slice(0,6-locked.length)].sort((a,b)=>a-b);if(!forbidden.has(key(game)))return game;}throw Error('새 조합을 찾지 못했어요. 잠금을 풀거나 후보를 늘려 주세요.');}
+    function generate(){const next=[];for(let i=0;i<state.count;i++){const retained=state.games.filter((_,j)=>j>i);next.push(makeGame(i,[...next,...retained],state.games[i]));}state.games=next;state.page='result';state.message='선택한 조건으로 번호를 만들었어요.';}
+    const balls=(numbers,locks=[])=>'<div class="balls">'+numbers.map(n=>`<span class="ball b${Math.ceil(n/10)} ${locks.includes(n)?'locked':''}" aria-label="${n}${locks.includes(n)?' 잠금':''}">${n}</span>`).join('')+'</div>';
+    const action=(label,act,primary=false,extra='')=>`<button class="${primary?'primary ':''}cursor-interaction" data-action="${act}" ${extra}>${label}</button>`;
+    const heading=(eyebrow,title,subtitle)=>`<div class="eyebrow">${eyebrow}</div><h2>${title}</h2><p class="subtle">${subtitle}</p>`;
+    function gameCard(g,i,editable=true){return `<div class="panel"><div class="game-head"><strong>${String.fromCharCode(65+i)} 게임</strong><span class="tag">${(state.locks[i]||[]).length?`${state.locks[i].length}개 잠금`:'추천 조합'}</span></div>${balls(g,state.locks[i]||[])}${editable?`<div class="game-actions">${action('번호 편집','edit',false,`data-index="${i}"`)}${action('다시 뽑기','reroll',false,`data-index="${i}" ${(state.locks[i]||[]).length===6?'disabled':''}`)}</div>`:''}</div>`;}
+    function render(){let body='',controls='',title='';
+      if(state.tab==='history'){
+        title=heading('MY LOTTO','내 번호를 모아두는 곳','구매한 번호와 추천 기록을 구분해요.');
+        body=`<div class="content">${state.records.length?state.records.map((r,i)=>`<div class="panel"><div class="row"><strong>추천 기록 ${i+1}</strong><span class="tag">결과 미등록</span></div><small>${r.games.length}게임 · 빈도 반영 ${r.hot?'ON':'OFF'}</small>${r.games.map((g,j)=>`<div class="space">${balls(g)}<label class="toggle">${String.fromCharCode(65+j)} 게임 실제 구매<input type="checkbox" data-purchase="${i}:${j}" ${r.purchased[j]?'checked':''}></label></div>`).join('')}</div>`).join(''):`<div class="panel"><h3>아직 저장한 추천이 없어요</h3><p class="subtle">마음에 드는 조합을 만들고 저장해 보세요.</p></div>`}${state.tickets.length?`<div class="panel"><strong>등록한 예시 용지 · ${state.tickets.length}게임</strong>${state.tickets.map(g=>balls(g)).join('')}</div>`:''}</div>`;
+        controls=`<div class="footer">${action('번호 추천으로 돌아가기','home',true)}</div>`;
+      } else if(state.tab==='stats'){
+        title=heading('NUMBER NOTES','숫자의 지난 기록','전체 회차 DB가 들어갈 통계 화면이에요.');
+        body=`<div class="content"><div class="panel soft"><span class="tag">예시 통계 · 실제 출현 횟수 아님</span><p class="space">기간을 바꾸어 분석하는 화면 구성입니다.</p></div><div class="panel"><h3>많이 나온 번호</h3>${rank.slice(0,7).map((n,i)=>`<div class="statrow"><strong>${n}</strong><div class="track"><span style="width:${90-i*7}%"></span></div><span>${180-i*7}회</span></div>`).join('')}</div><p class="subtle">실제 앱에서는 인터넷 없이 내부 DB로 계산해요.</p></div>`;
+        controls=`<div class="footer"><label>통계 범위<select id="lp-period"><option value="all">전체 회차</option><option value="100">최근 100회</option><option value="50">최근 50회</option></select></label><small>이 시안의 막대는 레이아웃 예시로 고정됩니다.</small></div>`;
+      } else if(state.page==='input'){
+        title=heading('ADD TICKET','용지 한 장이면 충분해요','QR부터 직접 입력까지 편한 방법으로.');
+        body=`<div class="content"><div class="panel soft"><h3>${state.source==='qr'?'QR 스캔':state.source==='photo'?'사진으로 등록':'직접 입력'}</h3><p class="subtle">${state.source==='manual'?'한 줄에 숫자 6개, 최대 5줄을 입력하세요.':'시안에서는 카메라를 사용하지 않아요. 예시 용지로 다음 화면을 확인해 보세요.'}</p></div>${state.source==='manual'?'<label>게임별 번호<textarea id="lp-manual" aria-label="게임별 번호" placeholder="3 11 18 24 32 41&#10;7 14 22 28 33 45"></textarea></label>':'<div class="empty-art"><span class="ball">A</span><span class="ball b2">B</span><span class="ball b5">C</span></div>'}</div>`;
+        controls=`<div class="sheet"><div class="handle"></div><div class="actions">${action('뒤로','home')}${action(state.source==='manual'?'번호 확인':'예시 용지 불러오기','review',true)}</div></div>`;
+      } else if(state.page==='review'){
+        title=heading('CHECK NUMBERS','번호를 확인해 주세요','잘못 읽힌 숫자는 직접 고칠 수 있어요.');
+        body=`<div class="content"><div class="panel"><span class="tag">이번 회차 · 시안용</span><label class="stack space">A~E 게임<textarea id="lp-review" aria-label="등록할 번호 확인 및 수정">${state.draft}</textarea></label><small>실제 앱에서는 회차도 확인하고 수정해요.</small></div></div>`;
+        controls=`<div class="sheet"><div class="handle"></div><div class="actions">${action('입력 방식 변경','input-methods')}${action('이 번호로 등록','register',true)}</div></div>`;
+      } else if(state.page==='methods'){
+        title=heading('ADD TICKET','번호 입력은 짧게','용지를 준비하고 아래에서 골라 주세요.');
+        body='<div class="content"><div class="empty-art"><span class="ball">7</span><span class="ball b2">12</span><span class="ball b5">41</span></div></div>';
+        controls=`<div class="sheet"><div class="handle"></div><h3>어떻게 등록할까요?</h3><div class="stack">${action('QR 스캔','source',true,'data-source="qr"')}${action('사진 촬영 · 사진 불러오기','source',false,'data-source="photo"')}${action('직접 입력','source',false,'data-source="manual"')}${action('닫기','home')}</div></div>`;
+      } else if(state.page==='edit'){
+        const i=state.editing,g=state.games[i],locked=state.locks[i]||[];
+        title=heading('KEEP YOUR PICKS','마음에 드는 숫자는 그대로','번호를 눌러 잠그고, 나머지만 바꿔요.');
+        body=`<div class="content"><div class="panel">${gameCard(g,i,false)}<p class="subtle">잠근 ${locked.length}개는 다시 뽑아도 유지됩니다.</p></div></div>`;
+        controls=`<div class="sheet"><div class="handle"></div><div class="count">${state.games.map((_,j)=>action(String.fromCharCode(65+j),'edit',false,`data-index="${j}" aria-pressed="${i===j}"`)).join('')}</div><div class="edit-grid">${g.map(n=>action(`${n}<small>${locked.includes(n)?'잠금 중':'잠그기'}</small>`,'lock',false,`data-number="${n}" aria-pressed="${locked.includes(n)}" aria-label="${n} ${locked.includes(n)?'잠금 해제':'잠그기'}"`)).join('')}</div><div class="actions">${action('잠금 해제','unlock')}${action('나머지 다시 뽑기','reroll',true,`data-index="${i}" ${locked.length===6?'disabled':''}`)}</div><div class="space">${action('편집 완료','result',false,'style="width:100%"')}</div></div>`;
+      } else if(state.page==='result'){
+        title=heading('YOUR COMBINATIONS','이번엔 이 번호, 어때요?','마음에 드는 번호는 잠그고 남겨두세요.');
+        body=`<div class="content">${state.games.map((g,i)=>gameCard(g,i)).join('')}</div>`;
+        controls=`<div class="footer"><div class="row" style="margin-bottom:10px">${action('옵션으로','home')}${action('번호 편집','edit',false,'data-index="0"')}</div><div class="actions">${action('전체 다시 뽑기','generate')}${action('추천 저장','save',true)}</div></div>`;
+      } else {
+        title=heading('A LITTLE DIFFERENT','내 번호 다음의 조합','이미 산 번호를 빼고, 새롭게 조합해요.');
+        if(state.tickets.length){const p=pool();body=`<div class="content"><div class="panel"><div class="row"><strong>등록한 용지</strong><span class="tag">${state.tickets.length}게임</span></div>${balls(state.tickets[0])}<small>${state.tickets.length>1?`외 ${state.tickets.length-1}게임 · `:''}입력 번호 확인 완료</small></div><div class="panel soft"><div class="row"><div><small>최종 추천 후보</small><div class="metric">${p.values.length}<small> 개</small></div></div><div class="subtle">기존 번호 ${p.excluded.size}개 제외<br>빈도 옵션 ${p.restored.length}개 복원</div></div></div><details><summary>제외·복원 번호 확인</summary><p class="subtle">제외: ${[...p.excluded].sort((a,b)=>a-b).join(', ')}</p><p class="subtle">복원: ${p.restored.join(', ')||'없음'}</p></details></div>`;
+        controls=`<div class="footer"><label>몇 게임을 만들까요?</label><div class="count">${[1,2,3,4,5].map(n=>action(n,'count',false,`data-count="${n}" aria-pressed="${state.count===n}"`)).join('')}</div><label class="toggle">자주 나온 번호 반영<input id="lp-hot" type="checkbox" ${state.hot?'checked':''}></label>${state.hot?`<details class="space"><summary>상세 옵션</summary><label>복원 기준<select id="lp-mode"><option value="global">전체 상위 10개와 겹치는 번호</option><option value="registered">등록번호 중 상위 3개</option></select></label><small>시안은 고정된 예시 순위로 동작해요.</small></details>`:''}<div class="space">${action(`${state.count}게임 추천받기`,'generate',true,'style="width:100%"')}</div></div>`;
+        }else{body='<div class="content"><div class="empty-art"><span class="ball">7</span><span class="ball b2">21</span><span class="ball b5">42</span></div><div class="panel"><h3>시작은, 가지고 있는 한 장</h3><p class="subtle">자동으로 구매한 용지를 등록하면<br>겹치는 번호를 빼고 추천해 드려요.</p></div><div class="row space"><span class="tag">QR로 빠르게</span><span class="tag">내 폰에 보관</span><span class="tag">1~5게임</span></div></div>';controls=`<div class="footer">${action('용지 등록하기','input-methods',true,'style="width:100%"')}<p class="subtle" style="text-align:center;margin-top:10px">QR · 사진 · 직접 입력</p></div>`;}
+      }
+      root.dataset.page=state.page; q('#lp-heading').innerHTML=title;q('#lp-body').innerHTML=body;q('#lp-controls').innerHTML=controls;q('#lp-status').textContent=state.message;
+      root.querySelectorAll('[data-nav]').forEach(b=>{b.classList.toggle('active',b.dataset.nav===state.tab);if(b.dataset.nav===state.tab)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
+      if(q('#lp-mode'))q('#lp-mode').value=state.mode;if(q('#lp-period'))q('#lp-period').value=state.period;
+    }
+    function parse(text){const lines=text.trim().split(/\r?\n/).filter(x=>x.trim());if(!lines.length||lines.length>5)throw Error('1~5게임을 입력해 주세요.');return lines.map((line,i)=>{const nums=line.trim().split(/[\s,]+/).map(Number);if(nums.length!==6||new Set(nums).size!==6||nums.some(n=>!Number.isInteger(n)||n<1||n>45))throw Error(`${String.fromCharCode(65+i)} 게임: 1~45의 서로 다른 숫자 6개를 입력해 주세요.`);return nums.sort((a,b)=>a-b);});}
+    root.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!root.contains(b))return;state.message='';try{
+      if(b.dataset.nav){state.tab=b.dataset.nav;render();return;}
+      switch(b.dataset.action){
+        case 'home':state.tab='recommend';state.page='home';break;
+        case 'input-methods':state.page='methods';break;
+        case 'source':state.source=b.dataset.source;state.page='input';break;
+        case 'review':{const data=state.source==='manual'?parse(q('#lp-manual').value):sample;state.draft=data.map(g=>g.join(' ')).join('\n');state.page='review';break;}
+        case 'register':state.tickets=parse(q('#lp-review').value);state.games=[];state.locks=[];state.page='home';state.message='용지를 등록했어요.';break;
+        case 'count':state.count=Number(b.dataset.count);state.games=[];state.locks=[];break;
+        case 'generate':generate();break;
+        case 'edit':state.editing=Number(b.dataset.index);state.page='edit';break;
+        case 'lock':{const i=state.editing,n=Number(b.dataset.number),ls=state.locks[i]||[];state.locks[i]=ls.includes(n)?ls.filter(v=>v!==n):[...ls,n];break;}
+        case 'unlock':state.locks[state.editing]=[];break;
+        case 'reroll':{const i=Number(b.dataset.index);state.games[i]=makeGame(i,state.games.filter((_,j)=>j!==i),state.games[i]);state.message=`${String.fromCharCode(65+i)} 게임을 다시 뽑았어요.`;break;}
+        case 'result':state.page='result';break;
+        case 'save':{const signature=state.games.map(key).join('|');if(state.records.some(r=>r.signature===signature)){state.message='이미 저장한 추천이에요.';}else{state.records.push({games:clone(state.games),hot:state.hot,purchased:state.games.map(()=>false),signature});state.message='추천을 저장했어요. 실제 구매한 게임은 표시해 주세요.';}state.tab='history';break;}
+      }
+    }catch(error){state.message=error.message;const manual=q('#lp-manual')?.value,review=q('#lp-review')?.value;render();if(manual!==undefined&&q('#lp-manual'))q('#lp-manual').value=manual;if(review!==undefined&&q('#lp-review'))q('#lp-review').value=review;return;}
+      render();
+    });
+    root.addEventListener('change',e=>{if(e.target.id==='lp-hot'){state.hot=e.target.checked;state.games=[];state.locks=[];}if(e.target.id==='lp-mode'){state.mode=e.target.value;state.games=[];state.locks=[];}if(e.target.id==='lp-period'){state.period=e.target.value;state.message='기간 선택을 반영했어요. 그래프 수치는 예시입니다.';}if(e.target.dataset.purchase){const [i,j]=e.target.dataset.purchase.split(':').map(Number);state.records[i].purchased[j]=e.target.checked;}render();});
+    render();
+    const design={corners:30};if(globalThis.Tweak){const tweak=new Tweak({container:root,onChange:()=>q('.phone').style.borderRadius=design.corners+'px'});tweak.addSlider(design,'corners',{label:'화면 모서리',min:12,max:32,unit:'px'});}
+  })();
+  </script>
+</div>
