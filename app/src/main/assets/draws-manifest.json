@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-09-18",
+  "firstRound": 1,
+  "lastRound": 1241,
+  "drawCount": 1241,
+  "firstDrawDate": "2002-12-07",
+  "lastDrawDate": "2026-09-12",
+  "source": "https://www.dhlottery.co.kr/lt645/result",
+  "retrievalApi": "https://www.dhlottery.co.kr/lt645/selectPstLt645InfoNew.do",
+  "sha256": "8e9a5f8b54e6e9feab47fb317bbf9492ba61e4f70409b745ad9d68b17155fd09"
+}

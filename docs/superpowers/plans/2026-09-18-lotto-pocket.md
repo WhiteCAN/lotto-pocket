@@ -15,6 +15,8 @@
 - 최소 Android 8(API 26). 버전 고정은 구현 시 공식 호환성 표로 검증한다.
 - 주요 버튼은 하단, 터치 영역 48dp 이상, 본문 16sp, 보조 13sp 이상.
 - 1~5게임, 기본 5게임, 빈도 복원 기본 OFF.
+- 전체 순위의 상위 N개는 1~45개 선택, 기본값만 10개. 마지막 선택과 추천 당시 N을 저장한다. N=45이면 전체 후보 복원을 표시한다.
+- 공통 고정번호 0~5개는 모든 게임에 반드시 포함하며 구매번호 제외보다 우선한다. 용지 없이 고정번호만으로 추천할 수 있다. 월·일 보조 입력은 중복 제거·유효 날짜를 검사하며 연도는 사용하지 않는다.
 - 본번호 6개만 빈도 집계, 보너스는 당첨 판정에 사용.
 - 앱이 처음 실행될 때 비행기 모드에서도 DB와 인식 모델을 사용할 수 있어야 한다.
 - 실제 QR 및 초기 역대 결과 자료 검증 전에 배포 완료를 선언하지 않는다.
@@ -106,6 +108,8 @@ Interface: `suspend fun importDraws(json:String):ImportResult`; `ImportResult`�
 - [ ] `./gradlew testDebugUnitTest connectedDebugAndroidTest`에서 가져오기 롤백과 업데이트 후 개인 기록 보존을 확인하고 커밋한다.
 
 ## Task 4: 하단 중심 추천 화면
+
+공통 고정번호 시트와 마지막 설정 보존도 이 작업에 포함한다. ViewModel에 fixedNumbers와 편집 초안을 분리하고 적용 전에는 추천 상태를 바꾸지 않는다. 숫자 선택 및 월·일 추가, 5개 초과 오류, 취소, 같은 설정 적용 시 초안 보존, 변경 적용 시 추천/개별 잠금 초기화를 검증한다. 저장된 RecommendationSnapshot은 fixedNumbers를 보존한다. 게임 편집에서는 공통 고정 해제 불가 및 개별 잠금 해제 후 공통 고정 유지를 확인한다. 도메인 테스트에는 고정 5개+추천 1개로 서로 다른 5게임, 제외번호와 겹친 고정 유지, 같은 월·일 중복 제거, 날짜 범위 검증을 추가한다.
 
 Files: `MainActivity.kt`, `LottoApp.kt`, `RecommendScreen.kt`, `RecommendViewModel.kt`, `RecommendScreenTest.kt`.
 

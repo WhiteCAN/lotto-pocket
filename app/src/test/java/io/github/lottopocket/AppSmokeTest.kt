@@ -1,0 +1,57 @@
+package io.github.lottopocket
+
+import androidx.compose.ui.test.*
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.semantics.SemanticsProperties
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+import java.io.File
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[35],qualifiers="w360dp-h800dp")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class AppSmokeTest {
+    @get:Rule val ui=createAndroidComposeRule<MainActivity>()
+    @Test fun generatesSavesAndShowsHistoryWithOfflineSeed() {
+        ui.waitUntil(30000) {
+            ui.onAllNodesWithText("5게임 추천받기").fetchSemanticsNodes().any { !it.config.contains(SemanticsProperties.Disabled) }
+        }
+        ui.onNodeWithText("5게임 추천받기").performClick()
+        ui.waitUntil(15000) { ui.onAllNodesWithTag("recommendation-game").fetchSemanticsNodes().isNotEmpty() }
+        ui.onNodeWithText("추천 저장").performClick()
+        ui.waitUntil(15000) { ui.onAllNodesWithText("저장됨").fetchSemanticsNodes().isNotEmpty() }
+        ui.onNodeWithText("내 로또").performClick()
+        ui.onAllNodesWithText("추천 기록").onFirst().assertIsDisplayed()
+        val output=File("build/reports/ui-screenshots/history.png")
+        output.parentFile?.mkdirs()
+        ui.runOnIdle {
+            val view=ui.activity.window.decorView
+            val bitmap=Bitmap.createBitmap(view.width,view.height,Bitmap.Config.ARGB_8888)
+            view.draw(Canvas(bitmap))
+            output.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG,100,it) }
+            bitmap.recycle()
+        }
+        ui.onNodeWithText("번호 통계").performClick()
+        ui.onNodeWithText("내부 DB 1241개 회차").assertIsDisplayed()
+    }
+    @Test fun fixedSettingsSurviveRotationAndApplyToNewGames() {
+        ui.waitUntil(30000) { ui.onAllNodesWithText("추천 설정").fetchSemanticsNodes().any { !it.config.contains(SemanticsProperties.Disabled) } }
+        ui.onNodeWithText("추천 설정").performClick()
+        ui.onNodeWithText("−").performClick()
+        ui.onNodeWithText("고정번호 0~5개").performTextInput("7 21")
+        ui.activityRule.scenario.recreate()
+        ui.onNodeWithText("4개").assertExists()
+        ui.onNodeWithText("설정 적용").performScrollTo().performClick()
+        ui.waitUntil(15000) { ui.onAllNodesWithText("4게임 추천받기").fetchSemanticsNodes().any { !it.config.contains(SemanticsProperties.Disabled) } }
+        ui.onNodeWithText("4게임 추천받기").performClick()
+        ui.waitUntil(15000) { ui.onAllNodesWithText("추천 저장").fetchSemanticsNodes().isNotEmpty() }
+        ui.onNodeWithTag("main-content").performScrollToNode(hasText("공통 고정: 7, 21"))
+        ui.onAllNodesWithText("공통 고정: 7, 21").onFirst().assertIsDisplayed()
+    }
+}
