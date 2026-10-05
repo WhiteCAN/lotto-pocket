@@ -44,14 +44,25 @@ class AppSmokeTest {
         ui.waitUntil(30000) { ui.onAllNodesWithText("추천 설정").fetchSemanticsNodes().any { !it.config.contains(SemanticsProperties.Disabled) } }
         ui.onNodeWithText("추천 설정").performClick()
         ui.onNodeWithText("−").performClick()
-        ui.onNodeWithText("고정번호 0~5개").performTextInput("7 21")
+        ui.onNodeWithText("고정번호 0~5개").performTextInput("7")
+        ui.onNodeWithText("끝에 번호 구분 공백 추가").performScrollTo().performClick()
+        ui.onNodeWithText("고정번호 0~5개").performTextInput("21")
         ui.activityRule.scenario.recreate()
         ui.onNodeWithText("4개").assertExists()
-        ui.onNodeWithText("설정 적용").performScrollTo().performClick()
+        ui.onNodeWithText("설정 적용").assertIsDisplayed().performClick()
         ui.waitUntil(15000) { ui.onAllNodesWithText("4게임 추천받기").fetchSemanticsNodes().any { !it.config.contains(SemanticsProperties.Disabled) } }
         ui.onNodeWithText("4게임 추천받기").performClick()
         ui.waitUntil(15000) { ui.onAllNodesWithText("추천 저장").fetchSemanticsNodes().isNotEmpty() }
         ui.onNodeWithTag("main-content").performScrollToNode(hasText("공통 고정: 7, 21"))
         ui.onAllNodesWithText("공통 고정: 7, 21").onFirst().assertIsDisplayed()
     }
+    @Test fun dateValidationIsLocalAndApplyRemainsVisibleWhenFrequencyExpands() {
+        ui.waitUntil(30000) { ui.onAllNodesWithText("추천 설정").fetchSemanticsNodes().any { !it.config.contains(SemanticsProperties.Disabled) } }
+        ui.onNodeWithText("추천 설정").performClick()
+        ui.onNodeWithText("생일·기념일 숫자 추가").performScrollTo().performClick()
+        ui.onNodeWithText("월과 일을 모두 입력해 주세요.").performScrollTo().assertIsDisplayed()
+        ui.onNode(isToggleable()).performScrollTo().performClick()
+        ui.onNodeWithText("설정 적용").assertIsDisplayed()
+    }
+
 }

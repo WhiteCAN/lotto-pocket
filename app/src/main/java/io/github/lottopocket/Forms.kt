@@ -10,6 +10,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import io.github.lottopocket.domain.LottoRules
 import io.github.lottopocket.domain.Options
@@ -36,32 +38,50 @@ fun StepChoice(label:String,value:Int,range:IntRange,onChange:(Int)->Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OptionsForm(original:Options,hasDraft:Boolean,apply:(Options)->Unit) {
+fun OptionsSheet(original:Options,hasDraft:Boolean,close:()->Unit,apply:(Options)->Unit) {
+    ModalBottomSheet(onDismissRequest=close,sheetState=rememberModalBottomSheetState(skipPartiallyExpanded=true)) {
+        Column(Modifier.fillMaxHeight(0.92f).imePadding().padding(horizontal=20.dp)) {
+            Text("추천 설정",style=MaterialTheme.typography.headlineSmall)
+            OptionsForm(original,hasDraft,Modifier.weight(1f),apply)
+        }
+    }
+}
+
+@Composable
+fun OptionsForm(original:Options,hasDraft:Boolean,modifier:Modifier=Modifier,apply:(Options)->Unit) {
     var value by rememberSaveable(stateSaver=Saver(save={DrawCodec.options(it)},restore={DrawCodec.options(it)})) { mutableStateOf(original) }
-    var fixed by rememberSaveable { mutableStateOf(original.fixed.sorted().joinToString(" ")) }
+    var fixed by rememberSaveable(stateSaver=TextFieldValue.Saver) { mutableStateOf(TextFieldValue(original.fixed.sorted().joinToString(" "))) }
     var month by rememberSaveable { mutableStateOf("") }
     var day by rememberSaveable { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
+    var dateError by remember { mutableStateOf<String?>(null) }
     fun parsed():Set<Int> {
-        val nums=if(fixed.isBlank()) emptySet() else fixed.trim().split(Regex("[\\s,]+" )).map { it.toIntOrNull() ?: error("숫자만 입력해 주세요.") }.toSet()
+        val nums=if(fixed.text.isBlank()) emptySet() else fixed.text.trim().split(Regex("[\\s,]+" )).map { it.toIntOrNull() ?: error("숫자만 입력해 주세요.") }.toSet()
         require(nums.size<=5 && nums.all { it in 1..45 }) { "고정번호는 1~45에서 최대 5개예요." }
         return nums
     }
+    Column(modifier.fillMaxWidth()) {
+    Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(vertical=14.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
     StepChoice("추천 게임 수",value.count,1..5) { value=value.copy(count=it) }
     HorizontalDivider()
     Text("나만의 고정번호",style=MaterialTheme.typography.titleMedium)
     Text("모든 게임에 넣고 나머지만 추천해요. 구매번호 제외보다 우선합니다.",style=MaterialTheme.typography.bodyMedium)
-    OutlinedTextField(value=fixed,onValueChange={fixed=it},label={Text("고정번호 0~5개")},placeholder={Text("예: 7 21 32")},modifier=Modifier.fillMaxWidth())
+    OutlinedTextField(value=fixed,onValueChange={fixed=it},label={Text("고정번호 0~5개")},placeholder={Text("예: 7 21 32")},keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Number),modifier=Modifier.fillMaxWidth())
+    TextButton(onClick={if(fixed.text.isNotBlank()) { val text=fixed.text.trimEnd()+" ";fixed=TextFieldValue(text,TextRange(text.length)) }},modifier=Modifier.fillMaxWidth()) { Text("끝에 번호 구분 공백 추가") }
     Row(horizontalArrangement=Arrangement.spacedBy(10.dp)) {
-        NumberField(month,{month=it},"월",Modifier.weight(1f))
-        NumberField(day,{day=it},"일",Modifier.weight(1f))
+        NumberField(month,{month=it;dateError=null},"월",Modifier.weight(1f))
+        NumberField(day,{day=it;dateError=null},"일",Modifier.weight(1f))
     }
+    dateError?.let { Text(it,color=MaterialTheme.colorScheme.error) }
     OutlinedButton(onClick={runCatching {
-        val next=parsed()+LottoRules.fixedFromDate(month.toInt(),day.toInt())
+        val m=month.toIntOrNull();val d=day.toIntOrNull()
+        require(m!=null && d!=null) { "월과 일을 모두 입력해 주세요." }
+        val next=parsed()+LottoRules.fixedFromDate(m,d)
         require(next.size<=5) { "최대 5개까지 고정할 수 있어요." }
-        fixed=next.sorted().joinToString(" ");error=null
-    }.onFailure { error=it.message ?: "월과 일을 확인해 주세요." }},modifier=Modifier.fillMaxWidth()) { Text("생일·기념일 숫자 추가") }
+        val text=next.sorted().joinToString(" ");fixed=TextFieldValue(text,TextRange(text.length));dateError=null
+    }.onFailure { dateError=it.message ?: "월과 일을 확인해 주세요." }},modifier=Modifier.fillMaxWidth()) { Text("생일·기념일 숫자 추가") }
     Text("7월 21일 → 7, 21 · 같은 숫자는 한 번만 · 연도 제외",style=MaterialTheme.typography.bodySmall)
     HorizontalDivider()
     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=androidx.compose.ui.Alignment.CenterVertically) {
@@ -81,8 +101,10 @@ fun OptionsForm(original:Options,hasDraft:Boolean,apply:(Options)->Unit) {
         PeriodChoice(value.last){value=value.copy(last=it)}
     }
     if(hasDraft) Text("설정을 변경하면 저장 전 추천과 게임별 잠금이 초기화돼요.",color=MaterialTheme.colorScheme.primary)
+    }
     error?.let { Text(it,color=MaterialTheme.colorScheme.error) }
-    Button(onClick={runCatching { apply(value.copy(fixed=parsed())) }.onFailure { error=it.message }},modifier=Modifier.fillMaxWidth().heightIn(min=52.dp)) { Text("설정 적용") }
+    Button(onClick={runCatching { apply(value.copy(fixed=parsed())) }.onFailure { error=it.message }},modifier=Modifier.fillMaxWidth().padding(vertical=12.dp).heightIn(min=52.dp)) { Text("설정 적용") }
+    }
 }
 
 @Composable

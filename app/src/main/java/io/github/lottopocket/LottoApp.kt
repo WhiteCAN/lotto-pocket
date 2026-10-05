@@ -7,6 +7,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -47,6 +48,9 @@ fun LottoApp(vm:LottoViewModel) {
     var ticketSource by rememberSaveable { mutableStateOf("MANUAL") }
     var editIndex by rememberSaveable { mutableIntStateOf(0) }
     var statsPeriod by rememberSaveable { mutableIntStateOf(0) }
+    val showingResults=tab==0 && vm.games.isNotEmpty()
+    val listState=rememberLazyListState()
+    LaunchedEffect(showingResults) { if(showingResults)listState.scrollToItem(0) }
     val snack=remember { SnackbarHostState() }
     val context=LocalContext.current
     val scope=rememberCoroutineScope()
@@ -70,17 +74,20 @@ fun LottoApp(vm:LottoViewModel) {
                 Column(Modifier.navigationBarsPadding().imePadding()) {
                     Column(Modifier.padding(horizontal=16.dp,vertical=8.dp),verticalArrangement=Arrangement.spacedBy(8.dp)) {
                         if(tab==0) {
-                            Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                            if(!showingResults) Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
                                 OutlinedButton(onClick=::openRegister,enabled=!vm.busy,modifier=Modifier.weight(1f)) { Text("용지 등록") }
                                 OutlinedButton(onClick={sheet="options"},enabled=!vm.busy,modifier=Modifier.weight(1f)) { Text("추천 설정") }
                             }
                             if(vm.games.isEmpty()) Button(onClick={vm.generate()},enabled=!vm.busy,modifier=Modifier.fillMaxWidth().heightIn(min=52.dp)) { Text("${vm.options.count}게임 추천받기") }
                             else {
                                 Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                                    OutlinedButton(onClick={vm.generate()},enabled=!vm.busy,modifier=Modifier.weight(1f)) { Text("전체 다시 뽑기") }
+                                    OutlinedButton(onClick={vm.generate()},enabled=!vm.busy,modifier=Modifier.weight(1f)) { Text("다시 뽑기") }
                                     Button(onClick={vm.save()},enabled=!vm.busy&&!vm.saved,modifier=Modifier.weight(1f)) { Text(if(vm.saved) "저장됨" else "추천 저장") }
                                 }
-                                TextButton(onClick={editIndex=0;sheet="edit"},enabled=!vm.busy,modifier=Modifier.fillMaxWidth()) { Text("번호 편집 · 잠금") }
+                                Row {
+                                    TextButton(onClick={editIndex=0;sheet="edit"},enabled=!vm.busy,modifier=Modifier.weight(1f)) { Text("번호 잠금") }
+                                    TextButton(onClick={sheet="more"},enabled=!vm.busy,modifier=Modifier.weight(1f)) { Text("등록·설정") }
+                                }
                             }
                         } else if(tab==1) {
                             Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
@@ -97,8 +104,9 @@ fun LottoApp(vm:LottoViewModel) {
             }
         },
     ) { padding ->
-        LazyColumn(Modifier.fillMaxSize().padding(padding).testTag("main-content"),contentPadding=PaddingValues(20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
-            item {
+        LazyColumn(Modifier.fillMaxSize().padding(padding).testTag("main-content"),state=listState,contentPadding=PaddingValues(20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
+            if(showingResults) item { Text("${vm.round}회 · 추천 ${vm.games.size}게임",style=MaterialTheme.typography.titleMedium) }
+            else item {
                 Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
                     Surface(shape=RoundedCornerShape(10.dp),color=MaterialTheme.colorScheme.primary) { Text("6",Modifier.padding(horizontal=10.dp,vertical=4.dp),fontWeight=FontWeight.Bold,color=MaterialTheme.colorScheme.onPrimary) }
                     Text("로또 포켓",style=MaterialTheme.typography.titleMedium)
@@ -108,7 +116,7 @@ fun LottoApp(vm:LottoViewModel) {
                 Text(if(tab==0) "고정하고, 제외하고, 나만의 조합을 만들어요." else if(tab==1) "실제 구매와 추천 기록을 따로 확인해요." else "인터넷 없이 휴대폰 안의 기록으로 계산해요.",style=MaterialTheme.typography.bodyMedium)
             }
             if(vm.busy)item { LinearProgressIndicator(Modifier.fillMaxWidth()) }
-            if(tab!=2)item {
+            if(tab!=2 && !showingResults)item {
                 Section {
                     Text("제 ${vm.round}회 · ${drawDate(vm.round)}",style=MaterialTheme.typography.titleMedium)
                     TextButton(onClick={ticketRound=vm.round.toString();sheet="round"},enabled=!vm.busy) { Text("회차 변경") }
@@ -116,7 +124,7 @@ fun LottoApp(vm:LottoViewModel) {
             }
             when(tab) {
                 0 -> {
-                    item { Section {
+                    if(!showingResults) item { Section {
                         Text("고정 ${vm.options.fixed.size}개 + 추천 ${6-vm.options.fixed.size}개",style=MaterialTheme.typography.titleMedium)
                         if(vm.options.fixed.isNotEmpty()) NumberBalls(vm.options.fixed.sorted())
                         Text("구매 ${vm.purchased.size}게임 · 최종 후보 ${vm.candidates.size}개",style=MaterialTheme.typography.bodyMedium)
@@ -175,7 +183,12 @@ fun LottoApp(vm:LottoViewModel) {
         }
     }
     when(sheet) {
-        "options" -> BottomSheet("추천 설정",{if(!vm.busy)sheet=""},message=sheetNotice) { OptionsForm(vm.options,vm.games.isNotEmpty()){vm.applyOptions(it);sheet=""} }
+        "more" -> BottomSheet("등록·설정",{sheet=""}) {
+            OutlinedButton(onClick=::openRegister,modifier=Modifier.fillMaxWidth()) { Text("용지 등록") }
+            OutlinedButton(onClick={sheet="options"},modifier=Modifier.fillMaxWidth()) { Text("추천 설정") }
+            OutlinedButton(onClick={ticketRound=vm.round.toString();sheet="round"},modifier=Modifier.fillMaxWidth()) { Text("회차 변경") }
+        }
+        "options" -> OptionsSheet(vm.options,vm.games.isNotEmpty(),{if(!vm.busy)sheet=""}) {vm.applyOptions(it);sheet=""}
         "register" -> BottomSheet("용지 등록",{if(!vm.busy)sheet=""},message=sheetNotice) {
             Text("촬영한 번호는 확인 후에만 저장됩니다.")
             CaptureInput(onDraft={round,text,source -> ticketRound=(round?:vm.round).toString();ticketText=text;ticketSource=source;sheet="review"},onError={vm.message=it})
@@ -246,6 +259,7 @@ fun NumberBalls(numbers:List<Int>,marked:Set<Int> = emptySet()) {
                 if(n in marked)Text("●",color=MaterialTheme.colorScheme.primary,style=MaterialTheme.typography.labelSmall)
             }
         }
+        repeat((6-numbers.size).coerceAtLeast(0)) { Spacer(Modifier.weight(1f)) }
     }
 }
 
