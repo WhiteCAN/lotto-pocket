@@ -3,6 +3,8 @@ package io.github.lottopocket
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.geometry.Offset
+import org.junit.Assert.assertEquals
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import org.junit.Rule
@@ -18,6 +20,25 @@ import java.io.File
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class AppSmokeTest {
     @get:Rule val ui=createAndroidComposeRule<MainActivity>()
+    @Test fun optionsScrollKeepsSheetStationaryAtBothEdges() {
+        ui.waitUntil(30000) { ui.onAllNodesWithText("추천 설정").fetchSemanticsNodes().any { !it.config.contains(SemanticsProperties.Disabled) } }
+        ui.onNodeWithText("추천 설정").performClick()
+        val titleTop=ui.onNodeWithTag("options-title").fetchSemanticsNode().boundsInRoot.top
+        val form=ui.onNodeWithTag("options-scroll")
+        form.performTouchInput { down(center);moveBy(Offset(0f,150f)) }
+        ui.waitForIdle()
+        assertEquals(titleTop,ui.onNodeWithTag("options-title").fetchSemanticsNode().boundsInRoot.top,1f)
+        form.performTouchInput { up() }
+        ui.onNode(isToggleable()).performScrollTo().performClick()
+        repeat(3) { form.performTouchInput { swipeUp() } }
+        ui.onNodeWithText("통계 기간").assertIsDisplayed()
+        assertEquals(titleTop,ui.onNodeWithTag("options-title").fetchSemanticsNode().boundsInRoot.top,1f)
+        ui.onNodeWithText("설정 적용").assertIsDisplayed()
+        repeat(3) { form.performTouchInput { swipeDown() } }
+        ui.onNodeWithText("추천 게임 수").assertIsDisplayed()
+        ui.onNodeWithText("닫기").performClick()
+        ui.onNodeWithText("5게임 추천받기").assertIsDisplayed()
+    }
     @Test fun historyDeletionRequiresConfirmationAndCanBeSavedAgain() {
         ui.waitUntil(30000) { ui.onAllNodesWithText("5게임 추천받기").fetchSemanticsNodes().any { !it.config.contains(SemanticsProperties.Disabled) } }
         ui.onNodeWithText("5게임 추천받기").performClick()

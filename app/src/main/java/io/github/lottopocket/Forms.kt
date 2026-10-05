@@ -9,6 +9,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.TextRange
@@ -41,9 +43,18 @@ fun StepChoice(label:String,value:Int,range:IntRange,onChange:(Int)->Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OptionsSheet(original:Options,hasDraft:Boolean,close:()->Unit,apply:(Options)->Unit) {
-    ModalBottomSheet(onDismissRequest=close,sheetState=rememberModalBottomSheetState(skipPartiallyExpanded=true)) {
+    ModalBottomSheet(
+        onDismissRequest=close,
+        sheetState=rememberModalBottomSheetState(skipPartiallyExpanded=true),
+        // Only the form scrolls; dragging the sheet competes with its nested scroll and IME layout.
+        sheetGesturesEnabled=false,
+        dragHandle=null,
+    ) {
         Column(Modifier.fillMaxHeight(0.92f).imePadding().padding(horizontal=20.dp)) {
-            Text("추천 설정",style=MaterialTheme.typography.headlineSmall)
+            Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
+                Text("추천 설정",modifier=Modifier.weight(1f).testTag("options-title"),style=MaterialTheme.typography.headlineSmall)
+                TextButton(onClick=close) { Text("닫기") }
+            }
             OptionsForm(original,hasDraft,Modifier.weight(1f),apply)
         }
     }
@@ -63,7 +74,7 @@ fun OptionsForm(original:Options,hasDraft:Boolean,modifier:Modifier=Modifier,app
         return nums
     }
     Column(modifier.fillMaxWidth()) {
-    Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(vertical=14.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
+    Column(Modifier.weight(1f).testTag("options-scroll").verticalScroll(rememberScrollState()).padding(vertical=14.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
     StepChoice("추천 게임 수",value.count,1..5) { value=value.copy(count=it) }
     HorizontalDivider()
     Text("나만의 고정번호",style=MaterialTheme.typography.titleMedium)
