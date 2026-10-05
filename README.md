@@ -49,3 +49,7 @@ ADB 연결 시 `adb install -r app/build/outputs/apk/debug/app-debug.apk`로 설
 - [구현 계획](docs/superpowers/plans/2026-09-18-lotto-pocket.md)
 
 초기 UX 시안은 design/lotto-pocket.html(Codex 시각화용 HTML 조각)에 보존했습니다. 시안 검사: `node scripts/check-prototype.cjs`.
+
+## Lumos 브랜드 아이콘
+
+Lumos 공통 L 모노그램을 사용한 전용 런처 아이콘을 적용했습니다. 적응형·단색 테마 자산과 색상은 [아이콘 가이드](docs/brand/README.md)를 참고하세요.
