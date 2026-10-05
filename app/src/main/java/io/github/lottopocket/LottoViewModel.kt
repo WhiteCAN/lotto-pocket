@@ -119,6 +119,26 @@ class LottoViewModel(application: Application) : AndroidViewModel(application) {
         records=dao.allGames()
         if(record.round==round)clearDraft()
     }
+    fun deleteRecords(ids: List<String>) = work {
+        val removed = repository.deleteRecords(ids)
+        records = dao.allGames()
+        clearDraft()
+        message = "${removed}개 기록을 삭제했어요."
+    }
+    fun resetOptions() = work {
+        val defaults = Options()
+        dao.putSetting(Setting("options", DrawCodec.options(defaults)))
+        options = defaults
+        clearDraft()
+        message = "추천 설정을 초기화했어요."
+    }
+    fun resetPersonalData() = work {
+        repository.resetPersonalData()
+        records = dao.allGames()
+        options = Options()
+        clearDraft()
+        message = "전체 개인 기록과 추천 설정을 초기화했어요."
+    }
     fun addDraw(targetRound: Int, text: String, bonus: Int, onDone: () -> Unit) = work {
         require(targetRound in 1..10000) { "회차를 확인해 주세요." }
         val lines = LottoRules.parseManual(text)

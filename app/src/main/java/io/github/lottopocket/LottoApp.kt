@@ -2,6 +2,7 @@ package io.github.lottopocket
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -20,6 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.lottopocket.data.DrawCodec
@@ -48,6 +51,12 @@ fun LottoApp(vm:LottoViewModel) {
     var ticketSource by rememberSaveable { mutableStateOf("MANUAL") }
     var editIndex by rememberSaveable { mutableIntStateOf(0) }
     var statsPeriod by rememberSaveable { mutableIntStateOf(0) }
+    var pendingAction by remember { mutableStateOf("") }
+    var pendingIds by remember { mutableStateOf<List<String>>(emptyList()) }
+    var pendingDescription by remember { mutableStateOf("") }
+    fun confirmDelete(ids: List<String>, description: String) {
+        pendingIds=ids;pendingDescription=description;pendingAction="delete";sheet=""
+    }
     val showingResults=tab==0 && vm.games.isNotEmpty()
     val listState=rememberLazyListState()
     LaunchedEffect(showingResults) { if(showingResults)listState.scrollToItem(0) }
@@ -90,6 +99,7 @@ fun LottoApp(vm:LottoViewModel) {
                                 }
                             }
                         } else if(tab==1) {
+                            TextButton(onClick={sheet="records"},enabled=!vm.busy,modifier=Modifier.fillMaxWidth()) { Text("기록 관리") }
                             Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
                                 OutlinedButton(onClick=::openRegister,enabled=!vm.busy,modifier=Modifier.weight(1f)) { Text("용지 등록") }
                                 Button(onClick={ticketRound=vm.round.toString();sheet="draw"},enabled=!vm.busy,modifier=Modifier.weight(1f)) { Text("당첨 결과 입력") }
@@ -108,7 +118,9 @@ fun LottoApp(vm:LottoViewModel) {
             if(showingResults) item { Text("${vm.round}회 · 추천 ${vm.games.size}게임",style=MaterialTheme.typography.titleMedium) }
             else item {
                 Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                    Surface(shape=RoundedCornerShape(10.dp),color=MaterialTheme.colorScheme.primary) { Text("6",Modifier.padding(horizontal=10.dp,vertical=4.dp),fontWeight=FontWeight.Bold,color=MaterialTheme.colorScheme.onPrimary) }
+                    Surface(shape=RoundedCornerShape(10.dp),color=colorResource(R.color.lumos_icon_background)) {
+                        Image(painter=painterResource(R.drawable.ic_lumos_foreground),contentDescription=null,modifier=Modifier.size(36.dp))
+                    }
                     Text("로또 포켓",style=MaterialTheme.typography.titleMedium)
                 }
                 Spacer(Modifier.height(20.dp))
@@ -161,6 +173,7 @@ fun LottoApp(vm:LottoViewModel) {
                                 Checkbox(checked=record.purchased,onCheckedChange={vm.purchase(record,it)},enabled=!vm.busy)
                                 Text("실제로 구매한 게임")
                             }
+                            TextButton(onClick={confirmDelete(listOf(record.id),"${record.round}회 · ${record.values().joinToString(", ")}\n${if(record.purchased) "구매한 게임" else "미구매 추천"} 1개")},enabled=!vm.busy) { Text("기록 삭제",color=MaterialTheme.colorScheme.error) }
                         }
                     }
                 }
@@ -183,6 +196,14 @@ fun LottoApp(vm:LottoViewModel) {
         }
     }
     when(sheet) {
+        "records" -> BottomSheet("기록 관리",{sheet=""}) {
+            val current=vm.records.filter { it.round==vm.round }
+            val recommendations=current.filter { it.source=="RECOMMEND" && !it.purchased }
+            Text("${vm.round}회 · 전체 ${current.size}개 / 미구매 추천 ${recommendations.size}개")
+            OutlinedButton(onClick={confirmDelete(recommendations.map { it.id },"${vm.round}회 미구매 추천 ${recommendations.size}개\n구매한 게임은 보존돼요.")},enabled=!vm.busy&&recommendations.isNotEmpty(),modifier=Modifier.fillMaxWidth()) { Text("이 회차 미구매 추천 삭제") }
+            OutlinedButton(onClick={confirmDelete(current.map { it.id },"${vm.round}회 전체 기록 ${current.size}개\n구매한 게임 ${current.count { it.purchased }}개도 삭제돼요.")},enabled=!vm.busy&&current.isNotEmpty(),modifier=Modifier.fillMaxWidth()) { Text("이 회차 전체 기록 삭제") }
+            TextButton(onClick={sheet="data"},modifier=Modifier.fillMaxWidth()) { Text("백업·전체 초기화") }
+        }
         "more" -> BottomSheet("등록·설정",{sheet=""}) {
             OutlinedButton(onClick=::openRegister,modifier=Modifier.fillMaxWidth()) { Text("용지 등록") }
             OutlinedButton(onClick={sheet="options"},modifier=Modifier.fillMaxWidth()) { Text("추천 설정") }
@@ -233,13 +254,31 @@ fun LottoApp(vm:LottoViewModel) {
             TextButton(onClick={sheet=""},modifier=Modifier.fillMaxWidth()) { Text("편집 완료") }
         }
         "data" -> BottomSheet("내부 데이터 관리",{if(!vm.busy)sheet=""},message=sheetNotice) {
+            Text("초기화해도 당첨 결과 데이터는 유지돼요. 삭제 전 필요한 개인 기록을 백업해 주세요.")
+            OutlinedButton(onClick={pendingAction="options";sheet=""},enabled=!vm.busy,modifier=Modifier.fillMaxWidth()) { Text("추천 설정 초기화") }
+            OutlinedButton(onClick={pendingDescription="모든 회차의 추천·구매 기록 ${vm.records.size}개와 추천 설정을 초기화해요.";pendingAction="reset";sheet=""},enabled=!vm.busy,modifier=Modifier.fillMaxWidth()) { Text("전체 개인 기록 초기화",color=MaterialTheme.colorScheme.error) }
             Text("당첨번호와 개인 기록은 휴대폰 내부 DB에 저장돼요. 앱을 삭제하기 전에 백업해 주세요.")
             Button(onClick={sheet="";import.launch(arrayOf("application/json","text/plain"))},modifier=Modifier.fillMaxWidth()) { Text("회차 데이터·백업 가져오기") }
             OutlinedButton(onClick={sheet="";export.launch("lotto-pocket-backup.json")},modifier=Modifier.fillMaxWidth()) { Text("개인 기록과 DB 백업") }
             OutlinedButton(onClick={ticketRound=vm.round.toString();sheet="draw"},modifier=Modifier.fillMaxWidth()) { Text("새 당첨 결과 직접 입력") }
-            Text("v0.1.0 · 앱 내 번호 조합과 통계는 당첨을 예측하지 않습니다. 복권 구매 기능은 제공하지 않습니다.",style=MaterialTheme.typography.bodySmall)
+            Text("v${BuildConfig.VERSION_NAME} · 앱 내 번호 조합과 통계는 당첨을 예측하지 않습니다. 복권 구매 기능은 제공하지 않습니다.",style=MaterialTheme.typography.bodySmall)
         }
     }
+    if(pendingAction.isNotEmpty()) AlertDialog(
+        onDismissRequest={pendingAction=""},
+        title={Text(if(pendingAction=="delete") "기록을 삭제할까요?" else "초기화할까요?")},
+        text={Text(if(pendingAction=="options") "고정번호·빈도·게임 수를 기본값으로 되돌려요. 저장된 기록은 유지돼요. 현재 추천과 잠금은 비워져요."
+            else "$pendingDescription\n현재 추천과 잠금도 비워져요. 당첨 결과는 유지돼요. 되돌릴 수 없으니 필요한 기록은 먼저 백업해 주세요.")},
+        dismissButton={TextButton(onClick={pendingAction=""}) { Text("취소") }},
+        confirmButton={TextButton(enabled=!vm.busy,onClick={
+            when(pendingAction) {
+                "delete" -> vm.deleteRecords(pendingIds)
+                "options" -> vm.resetOptions()
+                "reset" -> vm.resetPersonalData()
+            }
+            pendingAction=""
+        }) { Text(if(pendingAction=="delete") "삭제" else "초기화",color=MaterialTheme.colorScheme.error) }},
+    )
 }
 
 @Composable

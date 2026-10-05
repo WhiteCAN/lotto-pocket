@@ -18,6 +18,40 @@ import java.io.File
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class AppSmokeTest {
     @get:Rule val ui=createAndroidComposeRule<MainActivity>()
+    @Test fun historyDeletionRequiresConfirmationAndCanBeSavedAgain() {
+        ui.waitUntil(30000) { ui.onAllNodesWithText("5게임 추천받기").fetchSemanticsNodes().any { !it.config.contains(SemanticsProperties.Disabled) } }
+        ui.onNodeWithText("5게임 추천받기").performClick()
+        ui.waitUntil(15000) { ui.onAllNodesWithText("추천 저장").fetchSemanticsNodes().isNotEmpty() }
+        ui.onNodeWithText("추천 저장").performClick()
+        ui.waitUntil(15000) { ui.onAllNodesWithText("저장됨").fetchSemanticsNodes().isNotEmpty() }
+        ui.onNodeWithText("내 로또").performClick()
+        ui.onNodeWithTag("main-content").performScrollToNode(isToggleable())
+        ui.onAllNodes(isToggleable()).onFirst().performClick()
+        ui.waitUntil(15000) { ui.onAllNodesWithText("기록 관리").fetchSemanticsNodes().any { !it.config.contains(SemanticsProperties.Disabled) } }
+        ui.onNodeWithText("기록 관리").performClick()
+        ui.onNodeWithText("이 회차 미구매 추천 삭제").performClick()
+        ui.onNodeWithText("취소").performClick()
+        ui.onAllNodesWithText("추천 기록").onFirst().assertExists()
+        ui.onNodeWithText("기록 관리").performClick()
+        ui.onNodeWithText("이 회차 미구매 추천 삭제").performClick()
+        ui.onNodeWithText("삭제",substring=false).performClick()
+        ui.waitUntil(15000) { ui.onAllNodesWithText("기록 관리").fetchSemanticsNodes().any { !it.config.contains(SemanticsProperties.Disabled) } }
+        ui.onAllNodesWithText("추천 기록").onFirst().assertExists()
+        ui.onNodeWithTag("main-content").performScrollToNode(hasText("기록 삭제"))
+        ui.onNodeWithText("기록 삭제").performClick()
+        ui.onNodeWithText("삭제",substring=false).performClick()
+        ui.waitUntil(15000) { ui.onAllNodesWithText("이 회차에 저장한 번호가 없어요.").fetchSemanticsNodes().isNotEmpty() }
+        ui.onNodeWithText("번호 추천").performClick()
+        ui.onNodeWithText("5게임 추천받기").assertIsDisplayed().performClick()
+        ui.waitUntil(15000) { ui.onAllNodesWithText("추천 저장").fetchSemanticsNodes().any { !it.config.contains(SemanticsProperties.Disabled) } }
+        ui.onNodeWithText("내 로또").performClick()
+        ui.onNodeWithText("기록 관리").performClick()
+        ui.onNodeWithText("백업·전체 초기화").performClick()
+        ui.onNodeWithText("전체 개인 기록 초기화").performClick()
+        ui.onNodeWithText("초기화",substring=false).performClick()
+        ui.onNodeWithText("번호 통계").performClick()
+        ui.onNodeWithText("내부 DB 1241개 회차").assertExists()
+    }
     @Test fun generatesSavesAndShowsHistoryWithOfflineSeed() {
         ui.waitUntil(30000) {
             ui.onAllNodesWithText("5게임 추천받기").fetchSemanticsNodes().any { !it.config.contains(SemanticsProperties.Disabled) }

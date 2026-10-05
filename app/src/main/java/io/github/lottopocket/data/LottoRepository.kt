@@ -8,6 +8,13 @@ import org.json.JSONObject
 
 class LottoRepository(private val db: LottoDatabase) {
     private val dao = db.dao()
+    suspend fun deleteRecords(ids: List<String>): Int = db.withTransaction {
+        ids.distinct().chunked(500).sumOf { dao.deleteGames(it) }
+    }
+    suspend fun resetPersonalData() = db.withTransaction {
+        dao.deleteAllGames()
+        dao.putSetting(Setting("options", DrawCodec.options(io.github.lottopocket.domain.Options())))
+    }
     suspend fun saveRecommendations(games:List<GameRecord>):Int = db.withTransaction {
         val existing=dao.allGames().filter { it.source=="RECOMMEND" }.map { it.round to it.values().sorted() }.toMutableSet()
         val fresh=games.filter { existing.add(it.round to it.values().sorted()) }

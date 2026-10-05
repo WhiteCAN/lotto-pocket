@@ -14,6 +14,29 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
 class DatabaseTest {
+    @Test fun deletionIsScopedAndResetPreservesDrawsAndUnrelatedSettings() = runTest {
+        val db=Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(),LottoDatabase::class.java).build()
+        try {
+            val dao=db.dao();val repo=LottoRepository(db)
+            val recommendation=GameRecord("one","batch",2,"1,2,3,4,5,6","RECOMMEND",false,"","","{}",1)
+            val purchased=recommendation.copy(id="two",purchased=true)
+            val otherRound=recommendation.copy(id="three",round=3)
+            dao.insertGames(listOf(recommendation,purchased,otherRound))
+            repo.importDraws(listOf(Draw(1,"2002-12-07",listOf(10,23,29,33,37,40),16)))
+            dao.putSetting(Setting("options",DrawCodec.options(io.github.lottopocket.domain.Options(fixed=setOf(7)))))
+            dao.putSetting(Setting("unrelated","keep"))
+            assertEquals(1,repo.deleteRecords(listOf("one","one","missing")))
+            assertEquals(setOf("two","three"),dao.allGames().map { it.id }.toSet())
+            assertEquals(1,repo.saveRecommendations(listOf(recommendation.copy(numbers="7,8,9,10,11,12"))))
+            assertEquals(1,repo.deleteRecords(listOf("two")))
+            assertTrue(dao.allGames().none { it.purchased })
+            repo.resetPersonalData()
+            assertTrue(dao.allGames().isEmpty())
+            assertEquals(io.github.lottopocket.domain.Options(),DrawCodec.options(dao.setting("options")!!))
+            assertEquals(1,dao.allDraws().size)
+            assertEquals("keep",dao.setting("unrelated"))
+        } finally { db.close() }
+    }
     @Test fun backupRestoresRecordsAndIsIdempotent() = runTest {
         val context=ApplicationProvider.getApplicationContext<Context>()
         val source=Room.inMemoryDatabaseBuilder(context,LottoDatabase::class.java).build()

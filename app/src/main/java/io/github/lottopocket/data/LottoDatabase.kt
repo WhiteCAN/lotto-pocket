@@ -30,6 +30,8 @@ interface LottoDao {
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertDraws(items: List<DrawRecord>)
     @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertGames(items: List<GameRecord>)
     @Query("UPDATE games SET purchased = :purchased WHERE id = :id") suspend fun purchase(id: String, purchased: Boolean)
+    @Query("DELETE FROM games WHERE id IN (:ids)") suspend fun deleteGames(ids: List<String>): Int
+    @Query("DELETE FROM games") suspend fun deleteAllGames(): Int
     @Query("SELECT value FROM settings WHERE `key` = :key") suspend fun setting(key: String): String?
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun putSetting(setting: Setting)
 }
