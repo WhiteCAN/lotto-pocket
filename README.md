@@ -1,5 +1,7 @@
 # 로또 포켓
 
+[GitHub 저장소](https://github.com/WhiteCAN/lotto-pocket) · [APK 미리보기 릴리스](https://github.com/WhiteCAN/lotto-pocket/releases) · [빌드 검사](https://github.com/WhiteCAN/lotto-pocket/actions)
+
 구매한 로또 번호를 제외하고, 고정번호와 과거 출현 빈도를 선택해 조합을 만드는 오프라인 Android 앱입니다. 주요 조작은 하단 버튼과 하단 시트로 제공합니다.
 
 ## 구현 기능
@@ -25,13 +27,13 @@ Android 8.0(API 26) 이상. 빌드 환경은 JDK 21, Android SDK 36입니다. lo
 직접 설치용 개발 APK: `app/build/outputs/apk/debug/app-debug.apk`.
 ADB 연결 시 `adb install -r app/build/outputs/apk/debug/app-debug.apk`로 설치합니다. 파일을 휴대폰으로 옮겨 설치할 때는 해당 파일 앱의 외부 앱 설치 허용이 필요합니다.
 
-`app-release-unsigned.apk`는 서명 전 산출물이므로 배포용 설치 파일이 아닙니다. 공개 릴리스는 실기기 검증과 지속 사용할 릴리스 서명키 설정 후 진행합니다. 서명키와 local.properties는 Git에 포함하지 않습니다. 개발 APK에서 다른 서명으로 변경하면 그대로 업데이트할 수 없으므로 앱의 데이터 관리에서 먼저 백업하세요.
+`app-release-unsigned.apk`는 서명 전 산출물이므로 배포용 설치 파일이 아닙니다. 정식 릴리스는 추가 실물 용지 검증과 지속 사용할 릴리스 서명키 설정 후 진행합니다. 미리보기 릴리스는 개발 서명 APK이며 정식 버전과 구분합니다. 서명키와 local.properties는 Git에 포함하지 않습니다. 개발 APK에서 다른 서명으로 변경하면 그대로 업데이트할 수 없으므로 앱의 데이터 관리에서 먼저 백업하세요.
 
 ## 검증 범위와 남은 작업
 
 단위/Room/Compose 테스트는 추천 제약, 등수, 파싱, 가져오기 충돌 롤백, 반복 백업 복원, 설정 회전 복원, 추천 저장 및 내장 DB 표시를 검증합니다. Compose 화면은 Robolectric의 360dp 환경에서 확인했습니다.
 
-2026-10-05 Galaxy S25 Ultra(Android 16)에서 설치·추천·고정·잠금·저장·재실행·업데이트 보존과 생성 이미지 OCR을 확인했습니다. [실기기 테스트 기록](docs/device-test-2026-10-05.md)에 근거와 수정 내용을 정리했습니다. 실제 종이 QR·사진 정확도, 비행기 모드 신규 설치, 기기별 큰 글꼴·TalkBack은 미검증입니다. GitHub Actions 원격 실행과 Releases 공개는 아직 하지 않았습니다.
+2026-10-05 Galaxy S25 Ultra(Android 16)에서 설치·추천·고정·잠금·저장·재실행·업데이트 보존과 생성 이미지 OCR을 확인했습니다. [실기기 테스트 기록](docs/device-test-2026-10-05.md)에 근거와 수정 내용을 정리했습니다. 실제 종이 QR·사진 정확도, 비행기 모드 신규 설치, 기기별 큰 글꼴·TalkBack은 미검증입니다. GitHub Actions는 main 및 작업 브랜치의 변경을 검사합니다. 실행 결과는 위 빌드 검사 링크에서 확인할 수 있습니다. 다운로드한 미리보기 APK는 릴리스에 첨부한 SHA-256으로 확인할 수 있습니다.
 
 첫 버전은 구매 조합을 회차+번호로 중복 제거합니다. 번호가 같은 용지를 여러 장 산 수량을 관리하는 가계부 기능은 제공하지 않습니다. OCR은 전체 행을 사용자가 검수하며 개별 글자 신뢰도 표시를 제공하지 않습니다. 백업 파일은 복원 가능한 UTF-8 5MB 이하로 제한하고 초과 내보내기는 오류로 안내합니다.
 
